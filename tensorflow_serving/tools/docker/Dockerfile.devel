@@ -5,6 +5,7 @@ MAINTAINER Jeremiah Harmsen <jeremiah@google.com>
 RUN apt-get update && apt-get install -y \
         build-essential \
         curl \
+        expect \
         git \
         libfreetype6-dev \
         libpng12-dev \
@@ -56,7 +57,7 @@ RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
     >>/root/.bazelrc
 ENV BAZELRC /root/.bazelrc
 # Install the most recent bazel release.
-ENV BAZEL_VERSION 0.3.1
+ENV BAZEL_VERSION 0.3.2
 WORKDIR /
 RUN mkdir /bazel && \
     cd /bazel && \
@@ -66,5 +67,15 @@ RUN mkdir /bazel && \
     ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
     cd / && \
     rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
+
+# Get and build TensorFlow Serving
+RUN git clone --recurse-submodules https://github.com/ic/serving && \
+    cd serving && \
+    git checkout extended_dockerfile && \
+    cd tensorflow && \
+    expect -c ./configure -f ../tensorflow_serving/tools/docker/tf_configure.expect && \
+    cd .. && \
+    bazel test tensorflow_serving/... && \
+    cd /
 
 CMD ["/bin/bash"]
