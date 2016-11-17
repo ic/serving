@@ -73,7 +73,7 @@ RUN git clone --recurse-submodules https://github.com/ic/serving && \
     cd serving && \
     git checkout extended_dockerfile && \
     cd tensorflow && \
-    expect -c ./configure -f ../tensorflow_serving/tools/docker/tf_configure.expect && \
+    expect -f ../tensorflow_serving/tools/docker/tf_configure.expect && \
     cd .. && \
     bazel test tensorflow_serving/... && \
     cd /
